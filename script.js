@@ -1,207 +1,261 @@
-// Page navigation
-function showPage(pageName) {
-    // Hide all pages
-    document.querySelectorAll('.page').forEach(page => {
-        page.classList.remove('active');
-    });
-    
-    // Remove active class from all nav buttons
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    
-    // Show selected page
-    document.getElementById(pageName).classList.add('active');
-    
-    // Add active class to clicked button
-    event.currentTarget.classList.add('active');
+/* ============================================================
+   SAADA Sofiane // Terminal Portfolio - behaviour
+   ============================================================ */
+
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- Boot sequence (typewriter) ---------- */
+const bootEl = document.getElementById('boot');
+const bootLines = [
+    'Booting SofianeOS v2.3.0 ...',
+    'Loading kernel modules ......... [ OK ]',
+    'Mounting /dev/portfolio ........ [ OK ]',
+    'Starting game-dev services ..... [ OK ]',
+    'Welcome. Type "help" to interact.',
+];
+
+function renderBoot(text) {
+    bootEl.innerHTML = text.replace(/\[ OK \]/g, '[ <span class="ok">OK</span> ]');
 }
 
-// Three.js Solar System
-const container = document.getElementById('solar-system');
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+function hideBoot() {
+    if (!bootEl) return;
+    bootEl.classList.add('done');
+    setTimeout(() => { if (bootEl) bootEl.remove(); }, 220);
+}
 
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setClearColor(0x000000, 0);
-container.appendChild(renderer.domElement);
-
-// Create sun
-const sunGeometry = new THREE.SphereGeometry(2, 32, 32);
-const sunMaterial = new THREE.MeshPhongMaterial({
-    color: 0xff6600,
-    emissive: 0xff8800,
-    emissiveIntensity: 0.8,
-    shininess: 30
-});
-const sun = new THREE.Mesh(sunGeometry, sunMaterial);
-scene.add(sun);
-
-// Sun wireframe
-const sunWireframeGeometry = new THREE.SphereGeometry(2.05, 16, 16);
-const sunWireframeMaterial = new THREE.MeshBasicMaterial({
-    color: 0xffaa00,
-    wireframe: true,
-    transparent: true,
-    opacity: 0.6
-});
-const sunWireframe = new THREE.Mesh(sunWireframeGeometry, sunWireframeMaterial);
-sun.add(sunWireframe);
-
-// Create planet 1
-const planet1Geometry = new THREE.SphereGeometry(0.4, 16, 16);
-const planet1Material = new THREE.MeshPhongMaterial({
-    color: 0x4488ff,
-    emissive: 0x2244aa,
-    emissiveIntensity: 0.3
-});
-const planet1 = new THREE.Mesh(planet1Geometry, planet1Material);
-scene.add(planet1);
-
-const p1WireframeGeo = new THREE.SphereGeometry(0.42, 8, 8);
-const p1WireframeMat = new THREE.MeshBasicMaterial({
-    color: 0x88ccff,
-    wireframe: true,
-    transparent: true,
-    opacity: 0.7
-});
-const p1Wireframe = new THREE.Mesh(p1WireframeGeo, p1WireframeMat);
-planet1.add(p1Wireframe);
-
-// Create planet 2
-const planet2Geometry = new THREE.SphereGeometry(0.5, 16, 16);
-const planet2Material = new THREE.MeshPhongMaterial({
-    color: 0xff4444,
-    emissive: 0xaa2222,
-    emissiveIntensity: 0.3
-});
-const planet2 = new THREE.Mesh(planet2Geometry, planet2Material);
-scene.add(planet2);
-
-const p2WireframeGeo = new THREE.SphereGeometry(0.52, 8, 8);
-const p2WireframeMat = new THREE.MeshBasicMaterial({
-    color: 0xff8888,
-    wireframe: true,
-    transparent: true,
-    opacity: 0.7
-});
-const p2Wireframe = new THREE.Mesh(p2WireframeGeo, p2WireframeMat);
-planet2.add(p2Wireframe);
-
-// Create planet 3
-const planet3Geometry = new THREE.SphereGeometry(0.35, 16, 16);
-const planet3Material = new THREE.MeshPhongMaterial({
-    color: 0x44ff88,
-    emissive: 0x22aa44,
-    emissiveIntensity: 0.3
-});
-const planet3 = new THREE.Mesh(planet3Geometry, planet3Material);
-scene.add(planet3);
-
-const p3WireframeGeo = new THREE.SphereGeometry(0.37, 8, 8);
-const p3WireframeMat = new THREE.MeshBasicMaterial({
-    color: 0x88ffaa,
-    wireframe: true,
-    transparent: true,
-    opacity: 0.7
-});
-const p3Wireframe = new THREE.Mesh(p3WireframeGeo, p3WireframeMat);
-planet3.add(p3Wireframe);
-
-// Create orbit rings
-function createOrbitRing(radius) {
-    const points = [];
-    for (let i = 0; i <= 64; i++) {
-        const angle = (i / 64) * Math.PI * 2;
-        points.push(new THREE.Vector3(
-            Math.cos(angle) * radius,
-            0,
-            Math.sin(angle) * radius
-        ));
+function typeBoot(i = 0) {
+    if (i >= bootLines.length) {
+        revealSections();
+        setTimeout(hideBoot, reduceMotion ? 0 : 250);
+        return;
     }
-    const geometry = new THREE.BufferGeometry().setFromPoints(points);
-    const material = new THREE.LineBasicMaterial({
-        color: 0xff8800,
-        transparent: true,
-        opacity: 0.4
-    });
-    return new THREE.Line(geometry, material);
+    if (reduceMotion) {
+        renderBoot(bootLines.join('\n'));
+        revealSections();
+        hideBoot();
+        return;
+    }
+    const full = bootLines.slice(0, i).join('\n') + (i > 0 ? '\n' : '');
+    let c = 0;
+    const line = bootLines[i];
+    const tick = setInterval(() => {
+        c++;
+        renderBoot(full + line.slice(0, c));
+        if (c >= line.length) {
+            clearInterval(tick);
+            setTimeout(() => typeBoot(i + 1), 180);
+        }
+    }, 14);
 }
 
-scene.add(createOrbitRing(4));
-scene.add(createOrbitRing(6));
-scene.add(createOrbitRing(8));
-
-// Create orbit grid lines
-function createOrbitGrid(radius) {
-    const segments = 8;
-    for (let i = 0; i < segments; i++) {
-        const angle = (i / segments) * Math.PI * 2;
-        const points = [
-            new THREE.Vector3(0, 0, 0),
-            new THREE.Vector3(
-                Math.cos(angle) * radius,
-                0,
-                Math.sin(angle) * radius
-            )
-        ];
-        const geometry = new THREE.BufferGeometry().setFromPoints(points);
-        const material = new THREE.LineBasicMaterial({
-            color: 0xff8800,
-            transparent: true,
-            opacity: 0.15
+/* ---------- Reveal sections on scroll ---------- */
+function revealSections() {
+    const blocks = document.querySelectorAll('.reveal');
+    if (reduceMotion || !('IntersectionObserver' in window)) {
+        blocks.forEach(b => b.classList.add('shown'));
+        fillMeters();
+        return;
+    }
+    const io = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+            if (e.isIntersecting) {
+                e.target.classList.add('shown');
+                io.unobserve(e.target);
+            }
         });
-        scene.add(new THREE.Line(geometry, material));
+    }, { threshold: 0.12 });
+    blocks.forEach(b => io.observe(b));
+    // first block visible immediately
+    setTimeout(fillMeters, 300);
+}
+
+/* ---------- Language meters ---------- */
+function fillMeters() {
+    document.querySelectorAll('.lang-meter').forEach(meter => {
+        if (meter.dataset.built) return;
+        meter.dataset.built = '1';
+        const level = parseInt(meter.dataset.level, 10) || 0;
+        for (let i = 1; i <= 5; i++) {
+            const seg = document.createElement('span');
+            if (i <= level) {
+                if (reduceMotion) seg.classList.add('on');
+                else setTimeout(() => seg.classList.add('on'), i * 120);
+            }
+            meter.appendChild(seg);
+        }
+    });
+}
+
+/* ---------- Interactive CLI ---------- */
+const form = document.getElementById('cli-form');
+const input = document.getElementById('cli-input');
+const log = document.getElementById('cli-log');
+
+const links = {
+    github: 'https://github.com/SofianeSaada',
+    linkedin: 'https://www.linkedin.com/in/sofiane-saada-304a63298/',
+    email: 'mailto:s.sofiane2309@gmail.com',
+};
+
+const commands = {
+    help() {
+        return `Available commands:
+  about      - who is Sofiane
+  skills     - list skills
+  projects   - jump to projects
+  contact    - contact info
+  github     - open GitHub profile
+  linkedin   - open LinkedIn profile
+  email      - send an email
+  neofetch   - system info
+  clear      - clear this log`;
+    },
+    about()    { scrollToId('about');   return 'Opening about.txt ...'; },
+    skills()   { scrollToId('skills');  return 'Listing skills/ ...'; },
+    projects() { scrollToId('projects');return 'Loading projects/ ...'; },
+    contact()  { scrollToId('contact'); return 'Reading contact.txt ...'; },
+    github()   { window.open(links.github, '_blank');   return 'Opening GitHub ...'; },
+    linkedin() { window.open(links.linkedin, '_blank'); return 'Opening LinkedIn ...'; },
+    email()    { window.location.href = links.email;    return 'Opening mail client ...'; },
+    neofetch() {
+        return `sofiane@portfolio
+-----------------
+OS:      SofianeOS v2.3.0
+Role:    Game Developer
+Engines: Unity, Unreal Engine
+Langs:   C#, C++, Blender
+School:  Gaming Campus
+Uptime:  always learning`;
+    },
+    clear()    { log.innerHTML = ''; return null; },
+};
+
+function scrollToId(id) {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+}
+
+function appendLine(text, cls) {
+    const div = document.createElement('div');
+    div.className = 'line ' + (cls || '');
+    div.textContent = text;
+    log.appendChild(div);
+}
+
+if (form) {
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const raw = input.value.trim();
+        input.value = '';
+        if (!raw) return;
+        appendLine('sofiane@portfolio:~$ ' + raw, 'echo');
+        const cmd = raw.toLowerCase().split(/\s+/)[0];
+        if (cmd in commands) {
+            const out = commands[cmd]();
+            if (out) appendLine(out, 'res');
+        } else if (cmd === 'sudo') {
+            appendLine("Nice try. You don't have permission to do that. :)", 'err');
+        } else if (cmd === 'ls') {
+            appendLine('about.txt  skills/  projects/  contact.txt', 'res');
+        } else {
+            appendLine(`command not found: ${cmd}. Type "help".`, 'err');
+        }
+        log.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'nearest' });
+    });
+
+    // keep the input focused when clicking anywhere in the interactive area
+    document.getElementById('interactive').addEventListener('click', () => input.focus());
+}
+
+/* ---------- Boot on load ---------- */
+typeBoot();
+
+/* ============================================================
+   Three.js solar-system background
+   ============================================================ */
+(function initBackground() {
+    const container = document.getElementById('solar-system');
+    if (!container || typeof THREE === 'undefined') {
+        // three.js loaded with `defer`; retry shortly if not ready
+        if (typeof THREE === 'undefined') return void setTimeout(initBackground, 200);
+        return;
     }
-}
 
-createOrbitGrid(4);
-createOrbitGrid(6);
-createOrbitGrid(8);
-
-// Lights
-const ambientLight = new THREE.AmbientLight(0xffa500, 0.5);
-scene.add(ambientLight);
-
-const pointLight = new THREE.PointLight(0xffaa00, 2, 100);
-pointLight.position.set(0, 0, 0);
-scene.add(pointLight);
-
-camera.position.set(0, 5, 15);
-camera.lookAt(0, 0, 0);
-
-// Animation
-let time = 0;
-function animate() {
-    requestAnimationFrame(animate);
-    
-    time += 0.016;
-    
-    sun.rotation.y += 0.005;
-    
-    const orbit1Speed = (Math.PI * 2) / (5 / 0.016);
-    planet1.position.x = Math.cos(time * orbit1Speed) * 4;
-    planet1.position.z = Math.sin(time * orbit1Speed) * 4;
-    planet1.rotation.y += 0.02;
-    
-    const orbit2Speed = (Math.PI * 2) / (5 / 0.016);
-    planet2.position.x = Math.cos(time * orbit2Speed + Math.PI * 0.66) * 6;
-    planet2.position.z = Math.sin(time * orbit2Speed + Math.PI * 0.66) * 6;
-    planet2.rotation.y += 0.015;
-    
-    const orbit3Speed = (Math.PI * 2) / (5 / 0.016);
-    planet3.position.x = Math.cos(time * orbit3Speed + Math.PI * 1.33) * 8;
-    planet3.position.z = Math.sin(time * orbit3Speed + Math.PI * 1.33) * 8;
-    planet3.rotation.y += 0.025;
-    
-    renderer.render(scene, camera);
-}
-animate();
-
-// Handle window resize
-window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-});
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setClearColor(0x000000, 0);
+    container.appendChild(renderer.domElement);
+
+    const sun = new THREE.Mesh(
+        new THREE.SphereGeometry(2, 32, 32),
+        new THREE.MeshPhongMaterial({ color: 0xff6600, emissive: 0xff8800, emissiveIntensity: 0.8, shininess: 30 })
+    );
+    scene.add(sun);
+    sun.add(new THREE.Mesh(
+        new THREE.SphereGeometry(2.05, 16, 16),
+        new THREE.MeshBasicMaterial({ color: 0xffaa00, wireframe: true, transparent: true, opacity: 0.6 })
+    ));
+
+    function makePlanet(r, color, emissive) {
+        const p = new THREE.Mesh(
+            new THREE.SphereGeometry(r, 16, 16),
+            new THREE.MeshPhongMaterial({ color, emissive, emissiveIntensity: 0.3 })
+        );
+        p.add(new THREE.Mesh(
+            new THREE.SphereGeometry(r + 0.02, 8, 8),
+            new THREE.MeshBasicMaterial({ color, wireframe: true, transparent: true, opacity: 0.7 })
+        ));
+        scene.add(p);
+        return p;
+    }
+    const planet1 = makePlanet(0.4, 0x4488ff, 0x2244aa);
+    const planet2 = makePlanet(0.5, 0xff4444, 0xaa2222);
+    const planet3 = makePlanet(0.35, 0x44ff88, 0x22aa44);
+
+    function orbitRing(radius) {
+        const points = [];
+        for (let i = 0; i <= 64; i++) {
+            const a = (i / 64) * Math.PI * 2;
+            points.push(new THREE.Vector3(Math.cos(a) * radius, 0, Math.sin(a) * radius));
+        }
+        return new THREE.Line(
+            new THREE.BufferGeometry().setFromPoints(points),
+            new THREE.LineBasicMaterial({ color: 0xff8800, transparent: true, opacity: 0.4 })
+        );
+    }
+    [4, 6, 8].forEach(r => scene.add(orbitRing(r)));
+
+    scene.add(new THREE.AmbientLight(0xffa500, 0.5));
+    const point = new THREE.PointLight(0xffaa00, 2, 100);
+    scene.add(point);
+
+    camera.position.set(0, 5, 15);
+    camera.lookAt(0, 0, 0);
+
+    let time = 0;
+    let running = true;
+    document.addEventListener('visibilitychange', () => { running = !document.hidden; if (running) animate(); });
+
+    function animate() {
+        if (!running) return;
+        requestAnimationFrame(animate);
+        time += 0.016;
+        sun.rotation.y += 0.005;
+        const s = (Math.PI * 2) / (5 / 0.016);
+        planet1.position.set(Math.cos(time * s) * 4, 0, Math.sin(time * s) * 4);
+        planet2.position.set(Math.cos(time * s + Math.PI * 0.66) * 6, 0, Math.sin(time * s + Math.PI * 0.66) * 6);
+        planet3.position.set(Math.cos(time * s + Math.PI * 1.33) * 8, 0, Math.sin(time * s + Math.PI * 1.33) * 8);
+        renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+})();
